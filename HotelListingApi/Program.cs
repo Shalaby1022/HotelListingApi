@@ -1,3 +1,6 @@
+using HotelListingApi.Data;
+using Microsoft.EntityFrameworkCore;
+
 namespace HotelListingApi
 {
     public class Program
@@ -20,6 +23,14 @@ namespace HotelListingApi
                                       .AllowAnyHeader();
 
                                   });
+            });
+
+
+            //registering the DB connectiviety using EF core.
+            builder.Services.AddDbContext<AppDbContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+
             });
 
 
