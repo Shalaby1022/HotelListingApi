@@ -52,7 +52,7 @@ namespace HotelListingApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGet("/echo",
-                      context => context.Response.WriteAsync("echo"))
+                       context => context.Response.WriteAsync("echo"))
                                  .RequireCors(MyAllowSpecificOrigins);
 
                 endpoints.MapControllers()
