@@ -1,4 +1,6 @@
 using HotelListingApi.Data;
+using HotelListingApi.Data.Interfaces;
+using HotelListingApi.Repository;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelListingApi
@@ -40,6 +42,15 @@ namespace HotelListingApi
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            // AutoMapper
+            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+
+            // registering Generic repository and Unit Of Work
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped(typeof(IGenericRepository<>),typeof(GenericRepsitory<>));
+
 
             
 
