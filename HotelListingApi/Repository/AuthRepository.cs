@@ -137,6 +137,7 @@ namespace HotelListingApi.Repository
             authMdel.Roles = rolesList.ToList();
             authMdel.UserName = userEmailExistence.UserName;
 
+
             return authMdel;
 
         }
