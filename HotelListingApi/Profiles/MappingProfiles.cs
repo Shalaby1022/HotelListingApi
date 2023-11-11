@@ -22,7 +22,8 @@ namespace HotelListingApi.Profiles
             CreateMap<AppUser , RegisterDto>().ReverseMap();
             CreateMap<Auth ,  RegisterDto>().ReverseMap();
 
-            CreateMap<AppUser , LoginDto>().ReverseMap();
+            CreateMap<AppUser, LoginDto>().ReverseMap();
+            CreateMap<Auth, LoginDto>().ReverseMap();
 
 
         }
