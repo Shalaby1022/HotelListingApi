@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using HotelListingApi.DTOs.AuthDTOs;
+using HotelListingApi.DTOs.Authentication;
 using HotelListingApi.DTOs.CountryDTOs;
 using HotelListingApi.DTOs.HotelDTOs;
 using HotelListingApi.Models;
@@ -15,6 +17,15 @@ namespace HotelListingApi.Profiles
 
             CreateMap<Hotel , HotelDto>().ReverseMap();
             CreateMap<Hotel , CreateHotelDto>().ReverseMap();
+
+
+            CreateMap<AppUser , RegisterDto>().ReverseMap();
+            CreateMap<Auth ,  RegisterDto>().ReverseMap();
+
+            CreateMap<AppUser , LoginDto>().ReverseMap();
+
+
         }
+
     }
 }

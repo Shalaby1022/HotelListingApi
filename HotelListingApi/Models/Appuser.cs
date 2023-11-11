@@ -7,10 +7,10 @@ namespace HotelListingApi.Models
     {
         [Required]
         [StringLength(50, MinimumLength = 2)]
-        public string FName { get; set; }
+        public string FirstName { get; set; }
 
         [Required]
         [StringLength(50, MinimumLength = 2)]
-        public string LName { get; set; }
+        public string LastName { get; set; }
     }
 }
