@@ -9,6 +9,8 @@ namespace HotelListingApi.Data.Interfaces
         Task<Auth> RegisterAsync(RegisterDto registerDto);
         Task<Auth> GetLoginAsync(LoginDto loginDto);
 
+        Task<string> AddRoleAsync(AddRoleDto roleDto);
+
 
 
     }
