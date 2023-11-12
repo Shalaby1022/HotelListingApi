@@ -19,14 +19,16 @@ namespace HotelListingApi.Repository
     public class AuthRepository : IAuthRepository
     {
         private readonly UserManager<AppUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly Jwt _jwt;
         private readonly IMapper _mapper;
 
        
 
-        public AuthRepository(UserManager<AppUser> userManager , IMapper mapper , IOptions<Jwt> jwt )
+        public AuthRepository(UserManager<AppUser> userManager , RoleManager<IdentityRole> roleManager, IMapper mapper , IOptions<Jwt> jwt )
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _jwt = jwt.Value ?? throw new ArgumentNullException(nameof(jwt));
       
@@ -141,5 +143,33 @@ namespace HotelListingApi.Repository
             return authMdel;
 
         }
+
+        public async Task<string> AddRoleAsync(AddRoleDto roleDto)
+        {
+            var user = await _userManager.FindByIdAsync(roleDto.UserId);
+            if(user is null)
+            {
+                return "Invald User ID";
+            }
+            
+            if(!await _roleManager.RoleExistsAsync(roleDto.RoleName))
+            {
+                return "Invalid RoleName";
+            }
+
+            if(await _userManager.IsInRoleAsync(user , roleDto.RoleName))
+            {
+                return "User already assigned to this Role! You can't add it again";
+            }
+
+            var result = await _userManager.AddToRoleAsync(user , roleDto.RoleName);
+            if(!result.Succeeded)
+            {
+                return "Something Went Wrong";
+            }
+
+            return result.ToString();
+        }
+
     }
 }
