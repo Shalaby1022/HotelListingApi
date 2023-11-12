@@ -67,6 +67,21 @@ namespace HotelListingApi.Controllers
             return Ok("Successfully Loged");
         }
 
+        [HttpPost("add-role")]
+        public async Task<IActionResult> AddRoleAsync([FromBody] AddRoleDto roleDto)
+        {
+            if (roleDto == null) return BadRequest(ModelState);
+
+
+            if (!ModelState.IsValid) { return BadRequest(ModelState); }
+
+            var result = await _authRepository.AddRoleAsync(roleDto);
+
+            if (!string.IsNullOrEmpty(result)) return BadRequest(result);
+
+            return Ok(roleDto);
+        }
+
 
 
 
