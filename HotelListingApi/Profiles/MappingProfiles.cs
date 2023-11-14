@@ -13,10 +13,15 @@ namespace HotelListingApi.Profiles
         {
             CreateMap<Country , CountryDto>().ReverseMap();
             CreateMap<Country , CreateCoutnryDto>().ReverseMap();
+            CreateMap<Country , UpdateCountryDto>().ReverseMap();
+
 
 
             CreateMap<Hotel , HotelDto>().ReverseMap();
             CreateMap<Hotel , CreateHotelDto>().ReverseMap();
+            CreateMap<Hotel, UpdateHotelDto>().ReverseMap();
+
+
 
 
             CreateMap<AppUser , RegisterDto>().ReverseMap();

@@ -1,10 +1,8 @@
-﻿using HotelListingApi.DTOs.HotelDTOs;
-using HotelListingApi.Models;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace HotelListingApi.DTOs.CountryDTOs
 {
-    public class CountryDto
+    public class UpdateCountryDto
     {
         public int Id { get; set; }
 
@@ -15,7 +13,5 @@ namespace HotelListingApi.DTOs.CountryDTOs
         [Required(ErrorMessage = "ShortName is required.")]
         [StringLength(maximumLength: 5, ErrorMessage = "ShortName should be 5 characters at Max.")]
         public string ShortName { get; set; } = string.Empty;
-
-        public IEnumerable<HotelDto> Hotels { get; set; } 
     }
 }
