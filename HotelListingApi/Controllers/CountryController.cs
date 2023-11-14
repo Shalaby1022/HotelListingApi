@@ -2,7 +2,9 @@
 using HotelListingApi.Data.Interfaces;
 using HotelListingApi.DTOs.CountryDTOs;
 using HotelListingApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Runtime.InteropServices;
 
 namespace HotelListingApi.Controllers
 {
@@ -68,6 +70,83 @@ namespace HotelListingApi.Controllers
                 _logger.LogError(ex, "An error occurred while processing GetCountryById.");
                 return StatusCode(500, "Internal server error");
             }
+        }
+
+        [Authorize(Roles ="Admin")]
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> CreateNewCountry([FromBody] CreateCoutnryDto createCoutnryDto)
+        {
+
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError($"Invalid POST attempt in {nameof(CreateNewCountry)}");
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                if (createCoutnryDto == null) return BadRequest(ModelState);
+                var countryMap = _mapper.Map<Country>(createCoutnryDto);
+
+               await _unitOfWork.CountriesRepository.CreateAsync(countryMap);
+                await _unitOfWork.SaveAsync();
+
+                return NoContent();
+
+            }
+            catch ( Exception ex )
+            {
+                _logger.LogError(ex, $"An error occurred while creating and adding new country {nameof(CreateNewCountry)}.");
+                return StatusCode(500, "Internal server error");
+            }
+
+
+        }
+
+     
+        [HttpPut("{countryId}")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateExistedCountry( int countryId , [FromBody] UpdateCountryDto updateCountryDto)
+        {
+            if (updateCountryDto == null) return BadRequest(ModelState);
+
+            if (countryId != updateCountryDto.Id) return BadRequest(ModelState);
+
+            if (!ModelState.IsValid || countryId <1 )
+            {
+                _logger.LogError($"Invalid Put attempt in {nameof(UpdateExistedCountry)}");
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var countryRetreving = _unitOfWork.CountriesRepository.GetAllAsync(q => q.Id == countryId);
+
+                    if (countryRetreving == null)
+                    {
+                        _logger.LogError($"An error occurred while retreving the original data Coz id isn't matching" +
+                                                                            $" existing ones {nameof(UpdateExistedCountry)}.");
+                        return BadRequest("id deosn't match");
+                    }
+                
+                var countryMap = _mapper.Map<Country>(updateCountryDto);
+                 _unitOfWork?.CountriesRepository.UpdateAsync(countryMap);
+                await _unitOfWork.SaveAsync();
+
+                return NoContent();
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while creating and adding new country {nameof(UpdateExistedCountry)}.");
+                return StatusCode(500, "Internal server error");
+            }
+
         }
 
 
