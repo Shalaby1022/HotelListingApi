@@ -18,7 +18,7 @@ namespace HotelListingApi.Controllers
         private readonly IMapper _mapper;
 
 
-        public CountryController(IUnitOfWork unitOfWork , ILogger<CountryController> logger , IMapper mapper)
+        public CountryController(IUnitOfWork unitOfWork, ILogger<CountryController> logger, IMapper mapper)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -72,7 +72,7 @@ namespace HotelListingApi.Controllers
             }
         }
 
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -91,13 +91,13 @@ namespace HotelListingApi.Controllers
                 if (createCoutnryDto == null) return BadRequest(ModelState);
                 var countryMap = _mapper.Map<Country>(createCoutnryDto);
 
-               await _unitOfWork.CountriesRepository.CreateAsync(countryMap);
+                await _unitOfWork.CountriesRepository.CreateAsync(countryMap);
                 await _unitOfWork.SaveAsync();
 
                 return NoContent();
 
             }
-            catch ( Exception ex )
+            catch (Exception ex)
             {
                 _logger.LogError(ex, $"An error occurred while creating and adding new country {nameof(CreateNewCountry)}.");
                 return StatusCode(500, "Internal server error");
@@ -106,18 +106,18 @@ namespace HotelListingApi.Controllers
 
         }
 
-     
+
         [HttpPut("{countryId}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UpdateExistedCountry( int countryId , [FromBody] UpdateCountryDto updateCountryDto)
+        public async Task<IActionResult> UpdateExistedCountry(int countryId, [FromBody] UpdateCountryDto updateCountryDto)
         {
             if (updateCountryDto == null) return BadRequest(ModelState);
 
             if (countryId != updateCountryDto.Id) return BadRequest(ModelState);
 
-            if (!ModelState.IsValid || countryId <1 )
+            if (!ModelState.IsValid || countryId < 1)
             {
                 _logger.LogError($"Invalid Put attempt in {nameof(UpdateExistedCountry)}");
                 return BadRequest(ModelState);
@@ -127,15 +127,15 @@ namespace HotelListingApi.Controllers
             {
                 var countryRetreving = _unitOfWork.CountriesRepository.GetAllAsync(q => q.Id == countryId);
 
-                    if (countryRetreving == null)
-                    {
-                        _logger.LogError($"An error occurred while retreving the original data Coz id isn't matching" +
-                                                                            $" existing ones {nameof(UpdateExistedCountry)}.");
-                        return BadRequest("id deosn't match");
-                    }
-                
+                if (countryRetreving == null)
+                {
+                    _logger.LogError($"An error occurred while retreving the original data Coz id isn't matching" +
+                                                                        $" existing ones {nameof(UpdateExistedCountry)}.");
+                    return BadRequest("id deosn't match");
+                }
+
                 var countryMap = _mapper.Map<Country>(updateCountryDto);
-                 _unitOfWork?.CountriesRepository.UpdateAsync(countryMap);
+                _unitOfWork?.CountriesRepository.UpdateAsync(countryMap);
                 await _unitOfWork.SaveAsync();
 
                 return NoContent();
@@ -150,5 +150,41 @@ namespace HotelListingApi.Controllers
         }
 
 
+
+        [HttpDelete("{countryId}")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+
+        public async Task<IActionResult> DeleteCountry(int countryId)
+        {
+            if (countryId == null) { return NotFound(); }
+
+            if (!ModelState.IsValid || countryId < 0)
+            {
+                _logger.LogError($"Invalid Delete attempt in {nameof(DeleteCountry)}");
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                await _unitOfWork.HotelsRepsitory.GetByIdAsync(q => q.Id == countryId);
+
+                await _unitOfWork.HotelsRepsitory.DeleteAsync(countryId);
+                await _unitOfWork?.SaveAsync();
+                return NoContent();
+
+            }
+
+
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while Deleting existing Country {nameof(DeleteCountry)}.");
+                return StatusCode(500, "Internal server error! Please Try again");
+
+            }
+
+
+        }
     }
 }
