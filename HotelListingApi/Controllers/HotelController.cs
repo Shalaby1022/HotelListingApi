@@ -2,6 +2,7 @@
 using HotelListingApi.Data.Interfaces;
 using HotelListingApi.DTOs.CountryDTOs;
 using HotelListingApi.DTOs.HotelDTOs;
+using HotelListingApi.HotelListResourceParameters;
 using HotelListingApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,12 +29,11 @@ namespace HotelListingApi.Controllers
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Hotel>))]
         [ProducesResponseType(500)]
-        public async Task<ActionResult<IEnumerable<Hotel>>> GetAllHotels()
+        public async Task<ActionResult<IEnumerable<Hotel>>> GetAllHotels([FromQuery] Hotel_List_Resource_Parameters hotelResourcParameters)
         {
             try
             {
-                var hotels = await _unitOfWork.HotelsRepsitory.GetAllAsync();
-
+                var hotels = await _unitOfWork.HotelsRepsitory.GetAllAsync(hotelResourcParameters);
                 var mappedHotels = _mapper.Map<IEnumerable<HotelDto>>(hotels);
 
                 return Ok(mappedHotels);
