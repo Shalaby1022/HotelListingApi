@@ -1,4 +1,6 @@
-﻿using System.Linq.Expressions;
+﻿using HotelListingApi.HotelListResourceParameters;
+using System.Linq.Expressions;
+using X.PagedList;
 
 namespace HotelListingApi.Data.Interfaces
 {
@@ -9,6 +11,12 @@ namespace HotelListingApi.Data.Interfaces
             Func<IQueryable<T>, IOrderedQueryable<T>> orderdBy = null,
             List<string> includes = null
             );
+
+        Task<IPagedList<T>> GetAllAsync(
+            Hotel_List_Resource_Parameters resourceParameters,
+            List<string> includes = null
+            );
+
 
         Task<T> GetByIdAsync(
             Expression<Func<T, bool>> expression, List<string> includes = null);
