@@ -1,7 +1,11 @@
 ﻿using HotelListingApi.Data;
 using HotelListingApi.Data.Interfaces;
+using HotelListingApi.HotelListResourceParameters;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using System.Linq.Expressions;
+using X.PagedList;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace HotelListingApi.Repository
 {
@@ -60,6 +64,25 @@ namespace HotelListingApi.Repository
             }
 
             return await query.AsNoTracking().ToListAsync();
+        }
+
+        public async Task<IPagedList<T>> GetAllAsync(Hotel_List_Resource_Parameters resourceParameters, List<string> includes = null)
+        {
+            IQueryable<T> query = _db;
+
+            if (resourceParameters == null)
+            {
+                throw new ArgumentNullException(nameof(resourceParameters));
+            }
+
+            if (includes != null)
+            {
+                foreach (var includeProperty in includes)
+                {
+                    query = query.Include(includeProperty);
+                }
+            }
+            return await query.AsNoTracking().ToPagedListAsync(resourceParameters.PageNumber , resourceParameters.PageSize);
         }
 
         public async Task<T> GetByIdAsync(Expression<Func<T, bool>> expression, List<string> includes = null)
