@@ -1,3 +1,4 @@
+using HotelListingApi.Configurations;
 using HotelListingApi.Data;
 using HotelListingApi.Data.Interfaces;
 using HotelListingApi.Helpers.AuthJwt;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.Text;
 
 namespace HotelListingApi
@@ -99,7 +101,10 @@ namespace HotelListingApi
 
 
 
-            
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(builder.Configuration)
+                .CreateLogger();
+            builder.Host.UseSerilog();
 
             var app = builder.Build();
 
@@ -112,6 +117,8 @@ namespace HotelListingApi
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseSerilogRequestLogging();
 
             app.UseHttpsRedirection();
 
@@ -139,6 +146,8 @@ namespace HotelListingApi
 
 
             });
+
+            app.AddGlobalErrorHandlingMiddleWare();
 
             app.Run();
         }
