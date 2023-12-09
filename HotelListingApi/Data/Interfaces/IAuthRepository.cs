@@ -1,6 +1,6 @@
 ﻿using HotelListingApi.DTOs.AuthDTOs;
 using HotelListingApi.DTOs.Authentication;
-using HotelListingApi.Models;
+using HotelListingApi.Models.AuthModels;
 
 namespace HotelListingApi.Data.Interfaces
 {
@@ -8,8 +8,9 @@ namespace HotelListingApi.Data.Interfaces
     {
         Task<Auth> RegisterAsync(RegisterDto registerDto);
         Task<Auth> GetLoginAsync(LoginDto loginDto);
-
         Task<string> AddRoleAsync(AddRoleDto roleDto);
+        Task<Auth> RefreshTOkenAsync(string refreshToken);
+
 
 
 
