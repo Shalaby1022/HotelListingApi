@@ -4,6 +4,7 @@ using HotelListingApi.DTOs.Authentication;
 using HotelListingApi.DTOs.CountryDTOs;
 using HotelListingApi.DTOs.HotelDTOs;
 using HotelListingApi.Models;
+using HotelListingApi.Models.AuthModels;
 
 namespace HotelListingApi.Profiles
 {

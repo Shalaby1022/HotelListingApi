@@ -2,9 +2,10 @@
 using HotelListingApi.Data.Interfaces;
 using HotelListingApi.DTOs.AuthDTOs;
 using HotelListingApi.DTOs.Authentication;
-using HotelListingApi.Models;
+using HotelListingApi.Models.AuthModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Win32;
+using System.Security.Cryptography;
 
 namespace HotelListingApi.Controllers
 {
@@ -64,6 +65,11 @@ namespace HotelListingApi.Controllers
                 return BadRequest(mappedResult.Message);
             }
 
+            if(!string.IsNullOrEmpty(mappedResult.RefreshToken))
+            {
+                SetRefreshTokenInCookies(mappedResult.RefreshToken, mappedResult.RefreshTokenExpiration);
+            }
+
             return Ok("Successfully Loged");
         }
 
@@ -82,6 +88,33 @@ namespace HotelListingApi.Controllers
             return Ok(roleDto);
         }
 
+        private void SetRefreshTokenInCookies(string refreshToken , DateTime expires)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = expires.ToLocalTime()
+            };
+
+            Response.Cookies.Append("refresh Token",refreshToken, cookieOptions);
+
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> RefreshToken()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+
+            var result = await _authRepository.RefreshTOkenAsync(refreshToken);
+
+            if(!result.IsAuthenticated) return BadRequest(result);
+
+            SetRefreshTokenInCookies(result.RefreshToken, result.RefreshTokenExpiration);
+
+
+            return Ok(result);
+
+        }
 
 
 

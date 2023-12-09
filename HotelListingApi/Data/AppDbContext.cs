@@ -1,4 +1,5 @@
 ﻿using HotelListingApi.Models;
+using HotelListingApi.Models.AuthModels;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 

@@ -2,7 +2,6 @@
 using HotelListingApi.Data.Interfaces;
 using HotelListingApi.DTOs.Authentication;
 using HotelListingApi.Helpers.AuthJwt;
-using HotelListingApi.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -13,6 +12,8 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using HotelListingApi.DTOs.AuthDTOs;
+using HotelListingApi.Models.AuthModels;
+using System.Security.Cryptography;
 
 namespace HotelListingApi.Repository
 {
@@ -68,7 +69,7 @@ namespace HotelListingApi.Repository
             return new Auth
             {
                 Email = newUserRegistration.Email,
-                ExpiresOn = jwtSecurityToken.ValidTo,
+                //ExpiresOn = jwtSecurityToken.ValidTo,
                 IsAuthenticated = true,
                 Roles = new List<string> { "User" },
                 Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken),
@@ -133,11 +134,32 @@ namespace HotelListingApi.Repository
             var rolesList = await _userManager.GetRolesAsync(userEmailExistence);
 
             authMdel.Email = userEmailExistence.Email;
-            authMdel.ExpiresOn = JwtSecurityToken.ValidTo;
+            //authMdel.ExpiresOn = JwtSecurityToken.ValidTo;
             authMdel.IsAuthenticated = true;
             authMdel.Token = new JwtSecurityTokenHandler().WriteToken(JwtSecurityToken);
             authMdel.Roles = rolesList.ToList();
             authMdel.UserName = userEmailExistence.UserName;
+
+
+
+
+            if(userEmailExistence.RefreshTokens.Any(token => token.IsActive))
+            {
+                var activerefreshToken = userEmailExistence.RefreshTokens.FirstOrDefault(token=>token.IsActive);
+                authMdel.RefreshToken = activerefreshToken.Token;
+                authMdel.RefreshTokenExpiration = activerefreshToken.ExpiresOn;
+
+            }
+            else
+            {
+                var refreshTOken = GenerateRfreshToekn();
+                authMdel.RefreshToken = refreshTOken.Token;
+                authMdel.RefreshTokenExpiration = refreshTOken.ExpiresOn;
+                userEmailExistence.RefreshTokens.Add(refreshTOken);
+                await _userManager.UpdateAsync(userEmailExistence);
+            }
+
+
 
 
             return authMdel;
@@ -171,5 +193,64 @@ namespace HotelListingApi.Repository
             return result.ToString();
         }
 
+
+        private RefreshToken GenerateRfreshToekn()
+        {
+            var randomNumber = new byte[32];
+
+            using var Generator = new RNGCryptoServiceProvider();
+            Generator.GetBytes(randomNumber);
+
+            return new RefreshToken
+            {
+                Token = Convert.ToBase64String(randomNumber),
+                ExpiresOn = DateTime.UtcNow.AddDays(1),
+                CreatedOn = DateTime.UtcNow
+            };
+        }
+
+        public async Task<Auth> RefreshTOkenAsync(string refreshToken)
+        {
+            var authModel = new Auth();
+
+            var user = _userManager.Users.SingleOrDefault(users => users.RefreshTokens.Any(t=>t.Token == refreshToken));    
+            if(user == null)
+            {
+
+                authModel.Message = "Invalid TOken";
+                return authModel;
+            }
+
+            var refreshedToken = user.RefreshTokens.SingleOrDefault(t => t.Token == refreshToken);
+
+
+            if (!refreshedToken.IsActive)
+            {
+                authModel.Message = "InActive Token";
+                return authModel;
+            }
+
+            refreshedToken.RevokedOn = DateTime.UtcNow;
+
+            var newRefreshTOken = GenerateRfreshToekn();
+            user.RefreshTokens.Add(newRefreshTOken);
+            await _userManager.UpdateAsync(user);
+
+
+            var jwtToken = await CreateJwtToken(user);
+
+            authModel.IsAuthenticated = true;
+            authModel.Token = new JwtSecurityTokenHandler().WriteToken(jwtToken);
+            authModel.Email = user.Email;
+            authModel.UserName = user.UserName;
+            var roles = await _userManager.GetRolesAsync(user);
+            authModel.Roles = roles.ToList();
+            authModel.RefreshToken = newRefreshTOken.Token;
+            authModel.RefreshTokenExpiration = newRefreshTOken.ExpiresOn;
+            
+
+            return authModel;
+
+        }
     }
 }

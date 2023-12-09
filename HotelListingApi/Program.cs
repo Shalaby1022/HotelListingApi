@@ -2,7 +2,7 @@ using HotelListingApi.Configurations;
 using HotelListingApi.Data;
 using HotelListingApi.Data.Interfaces;
 using HotelListingApi.Helpers.AuthJwt;
-using HotelListingApi.Models;
+using HotelListingApi.Models.AuthModels;
 using HotelListingApi.Repository;
 using Jose;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -67,7 +67,9 @@ namespace HotelListingApi
                         ValidateLifetime = true,
                         ValidIssuer = builder.Configuration["JWT:Issuer"],
                         ValidAudience = builder.Configuration["JWT:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"])),
+                        ClockSkew = TimeSpan.Zero
+
 
                     };
                 });
